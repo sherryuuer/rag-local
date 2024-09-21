@@ -20,7 +20,7 @@ else:
 
 # Split and chunk
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=7500, chunk_overlap=100)
+    chunk_size=2000, chunk_overlap=100)  # 影响生成的片段的数量
 chunks = text_splitter.split_documents(data)
 
 # Add to vector database
@@ -32,7 +32,7 @@ vector_db = Chroma.from_documents(
 
 
 # LLM from Ollama
-local_model = "gemma2"
+local_model = "gemma2:2b"
 llm = ChatOllama(model=local_model)
 
 QUERY_PROMPT = PromptTemplate(
@@ -46,6 +46,7 @@ QUERY_PROMPT = PromptTemplate(
 )
 
 retriever = MultiQueryRetriever.from_llm(
+    # vector_db.as_retriever(search_n_results=2),  # 限制结果数量
     vector_db.as_retriever(),
     llm,
     prompt=QUERY_PROMPT
@@ -68,7 +69,7 @@ chain = (
 
 # chain.invoke(input(""))
 
-chain.invoke("list up the content about javascript")
-
+result = chain.invoke("list up the content about javascript")
+print(result)
 # Delete all collections in the db
 # vector_db.delete_collection()
